@@ -1,0 +1,136 @@
+\documentclass[elsart12,eqsecnum,graphics,cite,nofootinbib]
+%{revtex4-2}
+{revtex4-2}
+
+
+ %
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\documentstyle[elsart12,osa,epsf,eqsecnum,showkeys]{revtex4}
+%\documentclass[elsart12,epsf,eqsecnum]{revtex4}
+%\documentclass[elsart12,epsf,eqsecnum]{article}
+%\documentstyle[elsart12,osa,epsf,eqsecnum,epsfig,graphics,showkeys,cite]{revtex}
+%\usepackage{showkeys}
+
+\usepackage{epsfig,epsf}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{amsmath,amsfonts,amssymb,amsthm,nccmath,latexsym,mathtools}
+\usepackage[mathscr]{euscript}
+\usepackage{color}
+\usepackage{hyperref}
+\DeclareMathOperator{\Tr}{Tr}
+\usepackage{lineno}
+\usepackage{slashed}
+\usepackage{array}
+\usepackage{graphicx}% use this package if an eps figure is included.
+\usepackage{mathrsfs}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{float}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=blue,
+    filecolor=blue,
+    linkcolor=blue,
+    urlcolor=blue
+}
+\usepackage{bm}
+\usepackage{academicons}
+
+% Feynman Diagram
+\usepackage{pgfplots}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{feynmp-auto}
+\usepackage[compat=1.1.0]{tikz-feynman}
+\usetikzlibrary{decorations.pathmorphing}
+
+
+\renewcommand{\v}[1]{ \ensuremath{ {\bm{#1}} }} 
+\newcounter{questioncounter}
+\newcounter{equestioncounter}
+\setlength\parskip{10pt} \setlength\parindent{0in}
+\newcommand{\no}{\noindent}
+\begin{document}
+
+
+%\hoffset-1cm
+%\today
+% Yale printer values
+%\voffset1.5cm
+
+%\draft{BI-TP 2005/19}
+%\preprint{BI-TP 2005/19, CERN-PH-TH-2005/99
+\title{Path integral formulation of diffusion model}
+
+\author{Haowu Duan$^1$}
+\affiliation{
+$^1$ Physics Department, University of Connecticut, 2152 Hillside Road, Storrs, CT 06269, USA\\
+}
+%\date{\today}
+
+
+
+%\begin{abstract}\end{abstract}
+
+
+\maketitle
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Path integral formulation of the forward and time-reversed process}
+    Flow model and diffusion model can be understood as the time evolution of the initial noise toward the target data distribution either through
+ordinary different equation or stochastic differential equation. In addition, stochastic process can be formulated with path integral. In this note,
+we will formulate the flow model and diffusion model using path integral to gain insight into the machine learning process. 
+
+We start with the forward process with a slightly different notation.
+\begin{equation}
+    \begin{split}
+        dx(t)=f(t, x(t))\; dt + g(t)\; dW_t
+    \end{split}
+\end{equation}    
+where $f(t, x(t))$ is the drift term and $g(t)$ is the scale of the noise. Let's denote the noise term as $\xi_t$
+
+
+
+
+
+
+
+
+
+
+
+A discretized version
+is,
+\begin{equation}
+    \begin{split}
+        \Delta x(t)=f(t, x(t))\; \Delta t + g(t)\sqrt{\Delta t} v_t
+    \end{split}
+\end{equation} 
+where $v_t$ is drawn from $N(0, 1)$. We assume there is no correlation between noises from different time steps.
+\begin{equation}
+\begin{split}
+\langle v_t v_{t'} \rangle =\delta_{t,t'}
+\end{split}    
+\end{equation}    
+a different perspective of this process is that, probability distribution at time $t+\Delta t$ is given by,
+\begin{equation}
+\begin{split}
+&P(t+\Delta t, x(t+\Delta t))\\
+=&\frac{1}{\sqrt{2\pi}}\int d v_t e^{-\frac{v_t^2 \Delta_t}{2g(t)^2}}\int dx(t)\; P(t, x(t))\; \delta\Big(x(t)-x_{sol}(t)\Big)\\
+\end{split} 
+\end{equation}    
+where we have assumed that we know $P(t,x(t))$, we also have $x_{sol}(t)$ to be the solution of the equation of motion.
+\begin{equation}
+\begin{split}
+    \delta\Big( x(t+\Delta t)- x(t)-f(t,x(t))\Delta t + g(t) \sqrt{\Delta t} v_t\Big)
+\end{split}
+\end{equation}    
+
+
+\end{document}
