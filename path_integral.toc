@@ -1,4 +1,4 @@
-\contentsline {title}{Path integral formulation of diffusion model}{1}{section*.1}%
+\contentsline {title}{Notes on Path integral formulation of diffusion model}{1}{section*.1}%
 \tocdepth@munge 
 \contentsline {section}{\numberline {}Contents}{1}{section*.2}%
 \tocdepth@restore 

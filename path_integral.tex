@@ -56,14 +56,8 @@
 \begin{document}
 
 
-%\hoffset-1cm
-%\today
-% Yale printer values
-%\voffset1.5cm
 
-%\draft{BI-TP 2005/19}
-%\preprint{BI-TP 2005/19, CERN-PH-TH-2005/99
-\title{Path integral formulation of diffusion model}
+\title{Notes on Path integral formulation of diffusion model}
 
 \author{Haowu Duan$^1$}
 \affiliation{
@@ -83,9 +77,14 @@ $^1$ Physics Department, University of Connecticut, 2152 Hillside Road, Storrs, 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{Path integral formulation of the forward and time-reversed process}
-    Flow model and diffusion model can be understood as the time evolution of the initial noise toward the target data distribution either through
-ordinary different equation or stochastic differential equation. In addition, stochastic process can be formulated with path integral. In this note,
-we will formulate the flow model and diffusion model using path integral to gain insight into the machine learning process. 
+    Flow model and diffusion model can be understood as the time evolution of the initial noise toward the target data distribution either through stochastic differential equation. In addition, stochastic process can be formulated with path integral. In this note,
+we will formulate the diffusion model using path integral to gain insight into the machine learning process. 
+
+{\color{red} TO-DO:
+\item Using Onsager-Machlup function for forward process and reverse process
+\item Alternatively, there is another approach using Martin-Siggia-Rose path inegral.
+}
+
 
 We start with the forward process with a slightly different notation.
 \begin{equation}
