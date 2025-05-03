@@ -38,7 +38,9 @@
 }
 \usepackage{bm}
 \usepackage{academicons}
-
+\usepackage[many]{tcolorbox}
+% Define the lemma environment
+\newtheorem*{lemma*}{Lemma}
 % Feynman Diagram
 \usepackage{pgfplots}
 \usepackage{tikz}
@@ -77,59 +79,171 @@ $^1$ Physics Department, University of Connecticut, 2152 Hillside Road, Storrs, 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{Path integral formulation of the forward and time-reversed process}
-    Flow model and diffusion model can be understood as the time evolution of the initial noise toward the target data distribution either through stochastic differential equation. In addition, stochastic process can be formulated with path integral. In this note,
-we will formulate the diffusion model using path integral to gain insight into the machine learning process. 
-
-{\color{red} TO-DO:
-\item Using Onsager-Machlup function for forward process and reverse process
-\item Alternatively, there is another approach using Martin-Siggia-Rose path inegral.
-}
-
-
-We start with the forward process with a slightly different notation.
+    Flow model and diffusion model can be understood as the time evolution of the initial noise toward the target data distribution through ordinary and stochastic differential equation. In this note, I want to= demonstrate that Path integral formulation of the stochastic differential equation is the appropriate framework to intuitively understand diffusion model. I do not intend to give a full introduction to diffusion model since my goal is to clarify some of the conceptual confusion I had when I was learning diffusion model, and to provide a coherent narrative for the generative process of diffusion model.
+    
+We start with the forward process,
 \begin{equation}
     \begin{split}
-        dx(t)=f(t, x(t))\; dt + g(t)\; dW_t
+        d\v x(t)=\v u\Big(t, \v x(t)\Big)\; dt + \sigma(t)\; d\v W_t \label{eq:sde_c}
     \end{split}
 \end{equation}    
-where $f(t, x(t))$ is the drift term and $g(t)$ is the scale of the noise. Let's denote the noise term as $\xi_t$
-
-
-
-
-
-
-
-
-
-
-
-A discretized version
-is,
+where,
+\begin{itemize}
+\item $\v x(t)$ is the random variable that corresponds to the data distribution at time t, denoted as $P_t\Big(t, \v x(t)\Big)$.
+\item $f\Big(t, \v x(t)\Big)$ is the drift term and $g(t)$ is the scale of the noise.
+\item $dW_t$ is not differentiable, but continuously, we can write $\xi_t=g(t)\; dW_t$, and demand,
 \begin{equation}
-    \begin{split}
-        \Delta x(t)=f(t, x(t))\; \Delta t + g(t)\sqrt{\Delta t} v_t
-    \end{split}
-\end{equation} 
-where $v_t$ is drawn from $N(0, 1)$. We assume there is no correlation between noises from different time steps.
+ \langle \xi^i_t \xi^j_{t'}\rangle=\mathbb{E}[ \xi_t \xi_{t'}]= \sigma^2(t) \delta^{ij}\delta(t-t')
+\end{equation}
+since Dirac delta $\delta(t-t')$ is for continuous variable, upon discretization, we will have $\delta(t-t') \rightarrow \Delta t\; \delta_{mm'}$, with $t=m \Delta t$, and $t'=m' \Delta t$.
+\end{itemize}
+Now we ask the following question: given an initial distribution $P_0(x(t=0))$, if we draw samples from $P_0$ and update each data point based on Eq.~\eqref{eq:sde_c}, how will the data distribute at some later time T. To answer this question, the simplest way to do is to take a tiny time step $\Delta T$. We will work in It\^{o} scheme, $d\v x(t)\rightarrow x_{t+\Delta}-x_{t}$, for discretization to avoid unnecessary subtleties since my goal is intuitive picture. I will add the discuss of scheme dependence in the appendices. 
+\subsection{The forward process}
 \begin{equation}
 \begin{split}
-\langle v_t v_{t'} \rangle =\delta_{t,t'}
-\end{split}    
-\end{equation}    
-a different perspective of this process is that, probability distribution at time $t+\Delta t$ is given by,
-\begin{equation}
-\begin{split}
-&P(t+\Delta t, x(t+\Delta t))\\
-=&\frac{1}{\sqrt{2\pi}}\int d v_t e^{-\frac{v_t^2 \Delta_t}{2g(t)^2}}\int dx(t)\; P(t, x(t))\; \delta\Big(x(t)-x_{sol}(t)\Big)\\
-\end{split} 
-\end{equation}    
-where we have assumed that we know $P(t,x(t))$, we also have $x_{sol}(t)$ to be the solution of the equation of motion.
-\begin{equation}
-\begin{split}
-    \delta\Big( x(t+\Delta t)- x(t)-f(t,x(t))\Delta t + g(t) \sqrt{\Delta t} v_t\Big)
+P_{\Delta t}(\v x_{\Delta t})=\int d^d \v h \int d^d \v x_0 \; P_0(\v x_0) \delta\Big(\v x_{\Delta t}-\v x_0 -\v u\Big(0, \v x_0\Big)\; \Delta t - \sigma(0)\;\sqrt{\Delta t} \;\v h\Big) \times \frac{1}{\sqrt{2\pi}}\exp\{-\frac{\v h^2}{2}\}
 \end{split}
-\end{equation}    
+\end{equation}
+all this equation does is to collect all the points that will be updated from the initial distribution to a single data point $\v x_{\Delta t}$. The discretized noise is $d\v W_t=\sqrt{\Delta t}\; \v h$, with $\v h \sim \mathcal{N}(0,1)$. If we take the integral with respect to the noise, the Dirac $\delta$ will set,
+\begin{equation}
+\begin{split}
+\v h=&\frac{\Delta x-u(x_{0})\Delta t}{\sqrt{\Delta t}\sigma(0)}\\
+      =&\sqrt{\Delta t} \frac{\Delta x-u(x_{0})\Delta t}{\Delta t\;\sigma(0)}
+\end{split}
+\end{equation}
+now we can repeat the same procedure for N steps, with $\Delta t=T/N$
+\begin{equation}
+\begin{split}
+P_{T}(\v x_{T})
+&
+=
+\prod_{i=0}^{N-1}\int d^d \v h_i \int d^d \v x_i \;  \delta\Big(\v x_{i+1}-\v x_i -\v u\Big(i\Delta t , \v x_i\Big)\; \Delta t - \sigma(\v x_i)\;\sqrt{\Delta t} \;\v h_i\Big) \times \frac{1}{\sqrt{2\pi}}\exp\{-\frac{\v h_i^2}{2}\} P_0(\v x_0) \\
+&
+=\Big(\frac{1}{\sqrt{(2\pi})^N}\prod_{i=0}^{N-1} \int d^d \v x_i\Big) \;  \; \; \times \exp\{-\sum_{i=0}^N \Big[\sqrt{\Delta t} \frac{\Delta x(i\Delta t)-u(x_{i\Delta t})\Delta t}{2\Delta t\;\sigma^2(i\Delta t)}\Big]^2\} P_0(\v x_0) \\
+&
+\rightarrow  \int [\mathcal{D} x(t)] \exp\{-\int^T_0 dt \frac{\Big|\dot x(t)-u(x_{t})\Big|^2}{2\;\sigma^2(t)} \} P_0(\v x_0)\label{eq:pt_forward}
+\end{split}
+\end{equation}
+where we took the continuous limit,
+\begin{equation}
+\begin{split}
+\lim_{\Delta t \rightarrow 0} \v h^2&=dt \Big(\frac{\dot x(t)-u(x_{t})}{\;\sigma(t)}\Big)^2 \\
+   \lim_{\Delta t \rightarrow 0 } \prod_{i=0}^{N-1} \int d^d \v x_i &\rightarrow \int [\mathcal{D} x(t)] 
+\end{split}
+\end{equation}
+Eq.~\eqref{eq:pt_forward} is the path integral representation of the forward process. For readers who are not familiar with path integral $\int [\mathcal{D} x(t)] $ is just an expression for integration of all possible path that update data point $x_0$ and reach $x_T$. $L(x(t),\dot x(t))=|\dot x(t)-u(x_{t})|^2/\;2\sigma^2(t)$ is known as \textit{Onsager-Machlup function}. Why do we go through this exercise? The main reason is that we now have an expression that maps distribution to distribution not point to point, and it is completely free  of noise. But the forward process is only half the battle, that we only took our target distribution and added noise on it to reach distribution $P_T(X(T))$. We still need to reproduce the target distribution through the reverse process since the motivation is building generative models here. 
+
+\subsection{The reverse process}
+
+The backward process is governed by Time-reversed stochastic differential equation. Or instead, we want something like,
+\begin{equation}
+\begin{split}
+P_0(x_0)=\int [\mathcal{D} x(t)] \exp\{-\int^T_0 dt \;\tilde L(x) \} P_T(\v x_T)
+\end{split}
+\end{equation}
+there are multiple ways to derive the path integral and time-reversed stochastic differential equation. Here we use the same strategy used in the forward process, though this is not the most clever approach, it is straightforward and intuitive. We start with one tiny step again, as matter of fact, let us first write,
+\begin{equation}
+\begin{split}
+P_{\Delta t}(\v x_{\Delta t})
+&=\int d^d \v h \int d^d \v x_0 \; P_0(\v x_0) \delta\Big(\v x_{\Delta t}-\v x_0 -\v u\Big(0, \v x_0\Big)\; \Delta t - \sigma(0)\;\sqrt{\Delta t} \;\v h\Big) \times \frac{1}{\sqrt{2\pi}}\exp\{-\frac{\v h^2}{2}\} \\
+&=\int d^d \v x_0  P(x_{\Delta t}| x_0) P_0(x_0)
+\end{split}
+\end{equation}
+our starting point would be,
+\begin{equation}
+\begin{split}
+P_{0}(\v x_{0})
+&=\int d^d \v x_{\Delta t}  P(x_0| x_{\Delta t}) P_{\Delta t}(x_{\Delta t}) \label{eq:sp_sde}
+\end{split}
+\end{equation}
+Bayes's theorem tells us that,
+\begin{equation}
+P(A|B) P(B)= P(B|A) P(A)
+\end{equation}
+as a result,
+\begin{equation}
+P(x_0| x_{\Delta t})=\frac{P(x_{\Delta t}|x_0) P_0(x_0)}{P_{\Delta}(x_{\Delta t})}
+\end{equation}
+we plug this result back into Eq.~\eqref{eq:sp_sde},
+\begin{equation}
+\begin{split}
+P_{0}(\v x_{0})
+&=\int d^d \v x_{\Delta t}   \frac{P(\v x_{\Delta t}|\v x_0) P_0(\v x_0)}{P_{\Delta}(\v x_{\Delta t})}     P_{\Delta t}(\v x_{\Delta t}) \\
+&=\int d^d \v h \int d^d \v x_{\Delta t}   \delta\Big(\v x_{\Delta t}-\v x_0 -\v u\Big(0, \v x_0\Big)\; \Delta t - \sigma(0)\;\sqrt{\Delta t} \;\v h\Big) \times \frac{1}{\sqrt{2\pi}}\exp\{-\frac{\v h^2}{2}\}   \frac{P_0(\v x_0)}{P_{\Delta}(\v x_{\Delta t})} \\
+%&=\int d^d \v h \int d^d \v x_{\Delta t}   \delta\Big(\v x_{0}-\v x_{\Delta t} + \tilde{\v u}\Big(0, \v x_0\Big)\; \Delta t - \sigma(0)\;\sqrt{\Delta t} \;\v h\Big) \times \frac{1}{\sqrt{2\pi}}\exp\{-\frac{\v h^2}{2}\}
+\end{split}
+\end{equation}
+%where in the last step, we wrote down a similar time-reverse differential equation,
+%\begin{equation}
+%\begin{split}%
+%-d \v x_t = -\tilde{\v u} dt + \sigma(t)d \v W_t
+%\end{split}
+%\end{equation}
+%the goal is to solve $\tilde{\v u}$. We do not flip the sign of the noise is because it is Gaussian, and flip the sign will respect the same distribution.
+Take multiple iteration and $\Delta \rightarrow 0$ limit, we get,
+\begin{equation}
+\begin{split}
+P_0(\v x_0)=\int [\mathcal{D} x(t)] \exp\{-\int^T_0 dt \frac{\Big|\dot x(t)-u(\v x_{t})\Big|^2}{2\;\sigma^2(t)} -\int_0^T d \ln P_t(x_t)\} P_{\Delta t}(\v x_{\Delta t})
+\end{split}
+\end{equation}
+To calculate the total derivative of $\ln P_t(x_t)$, we need to use \textit{Itô's Lemma},
+\begin{lemma*}
+Let $\v x(t)$ be a stochastic process satisfying the stochastic differential equation,
+\begin{align}
+  d\v x(t)=\v u\Big(t, \v x(t)\Big)\; dt + \sigma(t)\; d\v W_t 
+\end{align}
+where \( W_t \) is a Wiener process, $\v u\Big(t, \v x(t)\Big)$ is the drift, and $\sigma(t)$ is the noise scale. If $ f(t, \v x(t)) $  is a twice-differentiable function, then the differential of $ f(t, \v x(t) $ is given by
+\begin{align}
+df(t, X_t) = \left( \frac{\partial f}{\partial t} +\v u\Big(t, \v x(t)\Big)\nabla_{\v x} f + \frac{1}{2}  \sigma(t)^2 \nabla^2_{\v x} f \right) dt + \sigma(t) (\nabla_{\v x} f ) \cdot  d\v W_t.
+\end{align}
+\end{lemma}
+%For people who are not familiar with the math, let me unpack what this means. Since we are evolving probability distributions, the following must be true, namely conservation of probability,
+%\begin{equation}
+%\int d^d\v x_t P_t(\v x_t) =1
+%\end{equation}
+%we take total derivative on both side,
+%\begin{equation}
+%\begin{split}
+%\int d^d\v x_t \Big\{ \frac{\partial P_t(\v x_t)}{\partial t}+ \frac{d \v x_t}{d t } \frac{\partial}{\partial \v x_t} P_t(\v x_t) \Big\}=0 
+%\end{split}
+%\end{equation}
+%plug in the equation of motion Eq.~\eqref{eq:sde_c}, we will get the Fokker-Plank equation.
+%\begin{tcolorbox}[title=Derivation of Fokker-Planck Equation]
+%We first subtract the integrand by $ \frac{\partial}{\partial \v x_t} \Big( \frac{d \v x_t}{d t } P_t(\v x_t)\Big)$, which by assumption gives zero contribution to the integral. 
+%\begin{equation}
+%\begin{split}
+%&\int d^d\v x_t \Big\{ \frac{\partial P_t(\v x_t)}{\partial t}+ \frac{d \v x_t}{d t } \frac{\partial}{\partial \v x_t} P_t(\v x_t) \Big\} \\
+%=& \int d^d\v x_t \Big\{ \frac{\partial P_t(\v x_t)}{\partial t}-  \Big(\frac{\partial}{\partial \v x_t} \frac{d \v x_t}{d t }\Big) P_t(\v x_t) \Big\} 
+%\end{split}
+%\end{equation}
+%\begin{equation}
+%\begin{split}
+%\frac{\partial P_t(\v x_t)}{\partial t}=- \frac{d \v x_t}{d t } \frac{\partial}{\partial \v x_t} P_t(\v x_t)
+%\end{split}
+%\end{equation} 
+%\end{tcolorbox}
+as a result,
+\begin{equation}
+\begin{split}
+\frac{d \ln P_t(x_t)}{dt}&= \frac{\partial  \ln P_t(x_t)}{\partial t} +\v u\Big(t, \v x(t)\Big)\nabla_{\v x}  \ln P_t(x_t) + \frac{1}{2}  \sigma(t)^2 \nabla^2_{\v x}  \ln P_t(x_t)  \\
+&
+=\frac{1}{P_t(x_t)} \frac{\partial  P_t(x_t)}{\partial t} +\v u\Big(t, \v x(t)\Big)\frac{1}{P_t(x_t)}\nabla_{\v x} P_t(x_t)+  \frac{1}{2}  \sigma(t)^2 \nabla^2_{\v x}  \ln P_t(x_t)\\
+&
+=\frac{1}{P_t(x_t)}\Big[-\nabla_{\v x}\v u\Big(t, \v x(t)\Big)P_t(x_t)+\frac{1}{2}  \sigma(t)^2 \nabla^2_{\v x}  P_t(x_t)   \Big]+\v u\Big(t, \v x(t)\Big)\frac{1}{P_t(x_t)}\nabla_{\v x} P_t(x_t)+  \frac{1}{2}  \sigma(t)^2 \nabla^2_{\v x}  \ln P_t(x_t) \\
+&
+=-\nabla_{\v x}\v u\Big(t, \v x(t)\Big)+\frac{\sigma^2(t)}{2} \frac{1}{P_t(x_t)}\nabla^2_{\v x}  P_t(x_t)+ \frac{1}{2}  \sigma(t)^2 \nabla^2_{\v x}  \ln P_t(x_t) \\
+&
+=
+\end{split}
+\end{equation}
+note that,
+\begin{equation}
+\begin{split}
+\frac{1}{P_t(x_t)}\nabla^2_{\v x}  P_t(x_t)=&\nabla_{\v x} \cdot \Big(\frac{1}{P_t(x_t)}\nabla_{\v x} P_t(x_t) \Big)- \Big(\nabla_{\v x} \cdot \frac{1}{P_t(x_t)}\Big)\Big(\nabla_{\v x} P_t(x_t) \Big) \\
+=&\nabla_{\v x}  \cdot \nabla_{\v x} \ln P_t(x_t)-
+\end{split}
+\end{equation}
+
 
 
 \end{document}

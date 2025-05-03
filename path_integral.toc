@@ -3,3 +3,5 @@
 \contentsline {section}{\numberline {}Contents}{1}{section*.2}%
 \tocdepth@restore 
 \contentsline {section}{\numberline {I}Path integral formulation of the forward and time-reversed process}{2}{section*.3}%
+\contentsline {subsection}{\numberline {A}The forward process}{2}{section*.4}%
+\contentsline {subsection}{\numberline {B}The reverse process}{3}{section*.5}%
